@@ -5,20 +5,22 @@ import { esTokenValido } from "@/lib/tokens";
 import { CardRemera } from "@/components/public/CardRemera";
 import { Button } from "@/components/ui/Button";
 import { StitchDivider } from "@/components/ui/StitchDivider";
+import { log } from "console";
 
 export default async function RemeraPage({
   params,
 }: {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }) {
-  const { token } = params;
+  const { token } = await params;
 
   if (!esTokenValido(token)) {
+    log(token)
     return <EstadoNeutral token={token} error="Ese código no es válido." />;
   }
 
   const session = await auth();
-  // @ts-expect-error -- tipo augmentado en next-auth.d.ts
+
   const tutorId: string | undefined = session?.user?.tutorId;
 
   const vista = await getVistaRemera(token, tutorId);

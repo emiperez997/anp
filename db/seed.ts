@@ -8,7 +8,7 @@
 import { db } from "./index";
 import { tutores, ninos, remeras, remeraNino, contactos } from "./schema";
 
-const TOKEN_DE_PRUEBA = "TESTABCD12"; // 10 chars, mismo alfabeto de lib/tokens.ts
+const TOKEN_DE_PRUEBA = "TESTABCD92"; // 10 chars, mismo alfabeto de lib/tokens.ts
 
 async function main() {
   console.log("Sembrando datos de prueba...");

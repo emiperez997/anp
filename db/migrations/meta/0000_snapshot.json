@@ -1,0 +1,659 @@
+{
+  "id": "f7a28a50-8e4e-48fe-8542-93d72f29220a",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.accesos_log": {
+      "name": "accesos_log",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "remera_id": {
+          "name": "remera_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "solicitud_id": {
+          "name": "solicitud_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_acceso_log",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "accesos_log_remera_idx": {
+          "name": "accesos_log_remera_idx",
+          "columns": [
+            {
+              "expression": "remera_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "creado_en",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "accesos_log_remera_id_remeras_id_fk": {
+          "name": "accesos_log_remera_id_remeras_id_fk",
+          "tableFrom": "accesos_log",
+          "tableTo": "remeras",
+          "columnsFrom": [
+            "remera_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "accesos_log_solicitud_id_solicitudes_acceso_id_fk": {
+          "name": "accesos_log_solicitud_id_solicitudes_acceso_id_fk",
+          "tableFrom": "accesos_log",
+          "tableTo": "solicitudes_acceso",
+          "columnsFrom": [
+            "solicitud_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.contactos": {
+      "name": "contactos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nino_id": {
+          "name": "nino_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "celular": {
+          "name": "celular",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "relacion": {
+          "name": "relacion",
+          "type": "relacion_contacto",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "es_principal": {
+          "name": "es_principal",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "contactos_nino_id_ninos_id_fk": {
+          "name": "contactos_nino_id_ninos_id_fk",
+          "tableFrom": "contactos",
+          "tableTo": "ninos",
+          "columnsFrom": [
+            "nino_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ninos": {
+      "name": "ninos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tutor_id": {
+          "name": "tutor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fecha_nacimiento": {
+          "name": "fecha_nacimiento",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "alergias_notas": {
+          "name": "alergias_notas",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "grupo_sanguineo": {
+          "name": "grupo_sanguineo",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "obra_social": {
+          "name": "obra_social",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ninos_tutor_id_tutores_id_fk": {
+          "name": "ninos_tutor_id_tutores_id_fk",
+          "tableFrom": "ninos",
+          "tableTo": "tutores",
+          "columnsFrom": [
+            "tutor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.remera_nino": {
+      "name": "remera_nino",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "remera_id": {
+          "name": "remera_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nino_id": {
+          "name": "nino_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ediciones_restantes": {
+          "name": "ediciones_restantes",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 3
+        },
+        "activo": {
+          "name": "activo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "vinculado_en": {
+          "name": "vinculado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "remera_nino_unico_idx": {
+          "name": "remera_nino_unico_idx",
+          "columns": [
+            {
+              "expression": "remera_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "nino_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "remera_nino_remera_id_remeras_id_fk": {
+          "name": "remera_nino_remera_id_remeras_id_fk",
+          "tableFrom": "remera_nino",
+          "tableTo": "remeras",
+          "columnsFrom": [
+            "remera_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "remera_nino_nino_id_ninos_id_fk": {
+          "name": "remera_nino_nino_id_ninos_id_fk",
+          "tableFrom": "remera_nino",
+          "tableTo": "ninos",
+          "columnsFrom": [
+            "nino_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.remeras": {
+      "name": "remeras",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "token": {
+          "name": "token",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "talle": {
+          "name": "talle",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lote": {
+          "name": "lote",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "estado": {
+          "name": "estado",
+          "type": "estado_remera",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'activa'"
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "remeras_token_idx": {
+          "name": "remeras_token_idx",
+          "columns": [
+            {
+              "expression": "token",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.solicitudes_acceso": {
+      "name": "solicitudes_acceso",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "remera_id": {
+          "name": "remera_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "celular_solicitante": {
+          "name": "celular_solicitante",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quien_dice_ser": {
+          "name": "quien_dice_ser",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "estado": {
+          "name": "estado",
+          "type": "estado_solicitud",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pendiente'"
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "autorizado_en": {
+          "name": "autorizado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expira_en": {
+          "name": "expira_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "autorizado_por": {
+          "name": "autorizado_por",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "solicitudes_estado_idx": {
+          "name": "solicitudes_estado_idx",
+          "columns": [
+            {
+              "expression": "estado",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "expira_en",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "solicitudes_remera_idx": {
+          "name": "solicitudes_remera_idx",
+          "columns": [
+            {
+              "expression": "remera_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "solicitudes_acceso_remera_id_remeras_id_fk": {
+          "name": "solicitudes_acceso_remera_id_remeras_id_fk",
+          "tableFrom": "solicitudes_acceso",
+          "tableTo": "remeras",
+          "columnsFrom": [
+            "remera_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "solicitudes_acceso_autorizado_por_tutores_id_fk": {
+          "name": "solicitudes_acceso_autorizado_por_tutores_id_fk",
+          "tableFrom": "solicitudes_acceso",
+          "tableTo": "tutores",
+          "columnsFrom": [
+            "autorizado_por"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tutores": {
+      "name": "tutores",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "celular": {
+          "name": "celular",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "varchar(120)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "tutores_celular_idx": {
+          "name": "tutores_celular_idx",
+          "columns": [
+            {
+              "expression": "celular",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.estado_remera": {
+      "name": "estado_remera",
+      "schema": "public",
+      "values": [
+        "activa",
+        "perdida",
+        "dada_de_baja"
+      ]
+    },
+    "public.estado_solicitud": {
+      "name": "estado_solicitud",
+      "schema": "public",
+      "values": [
+        "pendiente",
+        "autorizado",
+        "rechazado",
+        "expirado"
+      ]
+    },
+    "public.relacion_contacto": {
+      "name": "relacion_contacto",
+      "schema": "public",
+      "values": [
+        "mama",
+        "papa",
+        "tutor",
+        "otro"
+      ]
+    },
+    "public.tipo_acceso_log": {
+      "name": "tipo_acceso_log",
+      "schema": "public",
+      "values": [
+        "escaneo",
+        "solicitud_creada",
+        "solicitud_autorizada",
+        "solicitud_rechazada",
+        "solicitud_expirada"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
