@@ -27,6 +27,7 @@ import {
 export type VistaPublica = {
   tipo: "publica";
   remeraToken: string;
+  ninoId: string;
   nino: {
     nombre: string;
     edad: number | null;
@@ -41,7 +42,7 @@ export type VistaPublica = {
 };
 
 /** Lo que se agrega cuando hay una solicitud_acceso autorizada y vigente. */
-export type VistaExtendida = VistaPublica & {
+export type VistaExtendida = Omit<VistaPublica, "tipo"> & {
   tipo: "extendida";
   // TODO: sumar acá los campos sensibles reales cuando se definan
   // (dirección, escuela, segundo contacto) — hoy el modelo de `ninos` no
@@ -55,7 +56,7 @@ export type VistaExtendida = VistaPublica & {
 };
 
 /** Lo que ve el tutor dueño del registro, logueado. */
-export type VistaTutor = VistaExtendida & {
+export type VistaTutor = Omit<VistaExtendida, "tipo"> & {
   tipo: "tutor";
   edicionesRestantes: number;
 };
@@ -91,6 +92,7 @@ export async function getVistaRemera(
   const base: VistaPublica = {
     tipo: "publica",
     remeraToken: token,
+    ninoId: nino.id,
     nino: {
       nombre: nino.nombre,
       edad: calcularEdad(nino.fechaNacimiento),

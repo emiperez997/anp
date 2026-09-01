@@ -54,7 +54,12 @@ export const tutores = pgTable(
   "tutores",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    celular: varchar("celular", { length: 20 }).notNull(), // formato E.164
+    // Nullable: un tutor puede identificarse por celular (login SMS) o por
+    // email (login Google), no necesariamente por los dos. Postgres permite
+    // múltiples NULL en un índice único, así que ambos grupos conviven sin
+    // colisionar entre sí.
+    celular: varchar("celular", { length: 20 }), // formato E.164
+    email: varchar("email", { length: 255 }),
     nombre: varchar("nombre", { length: 120 }),
     creadoEn: timestamp("creado_en", { withTimezone: true })
       .defaultNow()
@@ -62,6 +67,7 @@ export const tutores = pgTable(
   },
   (t) => ({
     celularUnico: uniqueIndex("tutores_celular_idx").on(t.celular),
+    emailUnico: uniqueIndex("tutores_email_idx").on(t.email),
   })
 );
 

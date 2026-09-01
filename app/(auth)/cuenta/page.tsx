@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
@@ -11,6 +11,14 @@ import { StitchDivider } from "@/components/ui/StitchDivider";
 type Paso = "celular" | "codigo";
 
 export default function CuentaPage() {
+  return (
+    <Suspense fallback={null}>
+      <CuentaForm />
+    </Suspense>
+  );
+}
+
+function CuentaForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/panel";
@@ -91,6 +99,14 @@ export default function CuentaPage() {
               >
                 {cargando ? "Enviando…" : "Enviar código"}
               </Button>
+              <button
+                type="button"
+                className="mt-3 w-full text-sm text-ink-muted underline"
+                onClick={() => signIn("google", { callbackUrl })}
+                disabled={cargando}
+              >
+                Continuar con Google
+              </button>
             </>
           ) : (
             <>

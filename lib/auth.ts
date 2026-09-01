@@ -1,27 +1,37 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import { db } from "@/db";
 import { tutores } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { verificarOtp } from "@/lib/twilio";
 
 /**
- * El login es en dos pasos y NO usa el flujo "email magic link" ni
- * "credentials con password" de Auth.js: es SMS OTP vía Twilio Verify.
+ * Dos formas de login, que coexisten y arman el mismo tipo de sesión
+ * (`session.user.tutorId`) sin que el resto de la app necesite saber cuál
+ * se usó:
  *
- * Paso 1 (fuera de Auth.js): el form de /cuenta llama a un server action /
- * route que dispara lib/twilio.ts -> enviarOtp(celular). Auth.js no participa
- * todavía acá.
+ * 1. SMS OTP vía Twilio Verify (provider "sms-otp"), en dos pasos:
+ *    Paso 1 (fuera de Auth.js): el form de /cuenta llama a un server action /
+ *    route que dispara lib/twilio.ts -> enviarOtp(celular). Auth.js no
+ *    participa todavía acá.
+ *    Paso 2 (el `authorize` de abajo): cuando el usuario tipea el código de
+ *    6 dígitos, se llama a signIn("sms-otp", { celular, codigo }) desde el
+ *    cliente. `authorize` verifica el código contra Twilio y busca o crea
+ *    el tutor por celular.
  *
- * Paso 2 (esto): cuando el usuario tipea el código de 6 dígitos, se llama a
- * signIn("credentials", { celular, codigo }) desde el cliente. El
- * `authorize` de abajo verifica el código contra Twilio y, si es válido,
- * busca o crea el tutor por celular. Auth.js arma la sesión a partir de lo
- * que devuelve `authorize`.
+ * 2. Google OAuth (provider "google"): flujo estándar de Auth.js. El tutor
+ *    se busca/crea por email en el callback `jwt` (ver abajo), no en
+ *    `authorize` (Google no pasa por ese provider).
+ *
+ * Un tutor que entra alguna vez por SMS y otra por Google con la misma
+ * persona real genera dos filas separadas en `tutores` (no hay account
+ * linking celular↔email) — limitación conocida, aceptable para el MVP.
  */
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   providers: [
+    Google,
     Credentials({
       id: "sms-otp",
       name: "SMS OTP",
@@ -55,8 +65,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) token.tutorId = user.id;
+    async jwt({ token, user, account }) {
+      if (user && account?.provider === "sms-otp") {
+        // authorize() ya devolvió el id real de `tutores`.
+        token.tutorId = user.id;
+      }
+
+      if (user && account?.provider === "google" && user.email) {
+        let tutor = await db.query.tutores.findFirst({
+          where: eq(tutores.email, user.email),
+        });
+        if (!tutor) {
+          const [nuevo] = await db
+            .insert(tutores)
+            .values({ email: user.email, nombre: user.name ?? undefined })
+            .returning();
+          tutor = nuevo;
+        }
+        token.tutorId = tutor.id;
+      }
+
       return token;
     },
     async session({ session, token }) {

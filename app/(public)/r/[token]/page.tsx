@@ -1,21 +1,24 @@
 import Link from "next/link";
+import { after } from "next/server";
 import { auth } from "@/lib/auth";
 import { getVistaRemera } from "@/lib/permisos";
+import { registrarAccesoSiEsExterno } from "@/lib/accesos";
 import { esTokenValido } from "@/lib/tokens";
 import { CardRemera } from "@/components/public/CardRemera";
 import { Button } from "@/components/ui/Button";
 import { StitchDivider } from "@/components/ui/StitchDivider";
-import { log } from "console";
 
 export default async function RemeraPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>;
+  searchParams: Promise<{ vista?: string }>;
 }) {
   const { token } = await params;
+  const { vista: vistaParam } = await searchParams;
 
   if (!esTokenValido(token)) {
-    log(token)
     return <EstadoNeutral token={token} error="Ese código no es válido." />;
   }
 
@@ -23,12 +26,17 @@ export default async function RemeraPage({
 
   const tutorId: string | undefined = session?.user?.tutorId;
 
-  const vista = await getVistaRemera(token, tutorId);
+  // "Ver como extraño" fuerza la rama pública aunque haya sesión, sin que
+  // eso cuente como visita externa real (no se loguea acceso más abajo).
+  const tutorIdParaVista = vistaParam === "publica" ? undefined : tutorId;
+  const vista = await getVistaRemera(token, tutorIdParaVista);
 
   // Remera sin niño vinculado todavía -> Pantalla 1, CTA de carga.
   if (!vista) {
     return <EstadoNeutral token={token} />;
   }
+
+  after(() => registrarAccesoSiEsExterno(token, tutorId));
 
   return (
     <main className="mx-auto min-h-dvh max-w-sm px-6 py-10">
@@ -36,10 +44,7 @@ export default async function RemeraPage({
 
       {vista.tipo === "tutor" && (
         <div className="mt-4 flex gap-3">
-          <Link
-            href={`/panel/${vista.remeraToken}/editar`}
-            className="flex-1"
-          >
+          <Link href={`/panel/${vista.ninoId}/editar`} className="flex-1">
             <Button variant="outline-sage">Editar</Button>
           </Link>
           <Link href={`/r/${token}?vista=publica`} className="flex-1">
