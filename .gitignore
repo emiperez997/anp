@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# lotes de tokens/QRs generados (db/generar-lote.ts, scripts/generar-qrs.ts)
+# — son "llaves" a cada card antes de tener datos, no deben circular
+/db/lotes/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
