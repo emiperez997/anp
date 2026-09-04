@@ -1,0 +1,44 @@
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+/*
+  Tokens de ANP — motivo "etiqueta de tela".
+  Ver conversación de diseño: papel casi blanco, tinta azul noche (no negro
+  puro), un solo acento fuerte (mandarina) reservado para la acción de
+  llamar, salvia solo para estados "autorizado/activo".
+*/
+:root {
+  --anp-paper: #faf9f6;
+  --anp-ink: #1c2b3a;
+  --anp-ink-muted: #5b6b7a;
+  --anp-accent: #e8630a;
+  --anp-accent-dark: #9c3f05;
+  --anp-sage: #4f7a5c;
+  --anp-sage-dark: #2f4a37;
+  --anp-muted: #8a8477;
+  --anp-line: #e4e0d6;
+  --anp-tag-bg: #efebe2;
+  --anp-tag-accent-bg: #fbe4d6;
+}
+
+@layer base {
+  body {
+    background-color: var(--anp-paper);
+    color: var(--anp-ink);
+  }
+}
+
+/*
+  Motivo de "costura" — usar UNA vez por pantalla (arriba de la card
+  principal), nunca como decoración repetida. Ver frontend-design: la firma
+  visual se gasta en un solo lugar.
+*/
+.stitch-divider {
+  height: 8px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--anp-accent) 0 6px,
+    transparent 6px 12px
+  );
+  opacity: 0.7;
+}
