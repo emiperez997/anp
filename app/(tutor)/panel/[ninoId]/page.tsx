@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { inArray, desc } from "drizzle-orm";
+import { inArray, eq, and, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import { getNinoDeTutor, edicionesRestantesDeNino } from "@/lib/ownership";
 import { getVistaRemera } from "@/lib/permisos";
-import { accesosLog } from "@/db/schema";
+import { accesosLog, solicitudesAcceso } from "@/db/schema";
 import { CardRemera } from "@/components/public/CardRemera";
 import { Button } from "@/components/ui/Button";
 
@@ -59,8 +59,27 @@ export default async function VistaTutorNinoPage({
       })
     : [];
 
+  const pendientes = remeraIds.length
+    ? await db.query.solicitudesAcceso.findMany({
+        where: and(
+          inArray(solicitudesAcceso.remeraId, remeraIds),
+          eq(solicitudesAcceso.estado, "pendiente")
+        ),
+      })
+    : [];
+
   return (
     <main className="mx-auto min-h-dvh max-w-sm px-6 py-10">
+      {pendientes.map((p) => (
+        <Link
+          key={p.id}
+          href={`/panel/solicitudes/${p.id}`}
+          className="mb-4 block rounded-2xl bg-[var(--anp-tag-accent-bg)] px-4 py-3.5 text-sm font-medium text-accent-dark"
+        >
+          Alguien pidió acceso — tocá para decidir
+        </Link>
+      ))}
+
       <CardRemera vista={vista} />
 
       <div className="mt-4 flex gap-3">
