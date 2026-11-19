@@ -33,8 +33,9 @@ export async function notificarSolicitudAcceso(params: {
   ninoNombre: string;
   quienDiceSer: string | null;
   urlDecision: string;
+  urlUbicacion?: string | null;
 }) {
-  const { celularTutor, ninoNombre, quienDiceSer, urlDecision } = params;
+  const { celularTutor, ninoNombre, quienDiceSer, urlDecision, urlUbicacion } = params;
   const texto = quienDiceSer
     ? `${ninoNombre} está esperando esta llamada. Alguien que dice ser "${quienDiceSer}" pidió ver más datos. Decidí acá: ${urlDecision}`
     : `${ninoNombre} está esperando esta llamada. Alguien pidió ver más datos. Decidí acá: ${urlDecision}`;
@@ -42,6 +43,6 @@ export async function notificarSolicitudAcceso(params: {
   return client.messages.create({
     to: celularTutor,
     from: process.env.TWILIO_SMS_FROM, // número/sender de SMS normal, distinto del Verify service
-    body: texto,
+    body: urlUbicacion ? `${texto} Ubicación: ${urlUbicacion}` : texto,
   });
 }

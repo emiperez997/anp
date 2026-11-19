@@ -13,6 +13,7 @@ import { eq, and } from "drizzle-orm";
 import { remeras, remeraNino, solicitudesAcceso, accesosLog } from "@/db/schema";
 import { notificarSolicitudAcceso } from "@/lib/twilio";
 import { SOLICITUD_TTL_MINUTOS } from "@/lib/constants";
+import { columnasUbicacion, mapsUrl, type Ubicacion } from "@/lib/ubicacion";
 
 export { SOLICITUD_TTL_MINUTOS };
 
@@ -21,8 +22,11 @@ export async function crearSolicitud(params: {
   celularSolicitante: string;
   quienDiceSer: string;
   urlBase: string;
+  ubicacion?: Ubicacion | null;
 }) {
   const { token, celularSolicitante, quienDiceSer, urlBase } = params;
+  const ubicacion = params.ubicacion ?? null;
+  const colsUbicacion = columnasUbicacion(ubicacion);
 
   const remera = await db.query.remeras.findFirst({ where: eq(remeras.token, token) });
   if (!remera || remera.estado === "dada_de_baja") return null;
@@ -41,6 +45,7 @@ export async function crearSolicitud(params: {
       remeraId: remera.id,
       celularSolicitante: celularSolicitante.trim(),
       quienDiceSer: quienDiceSer.trim() || null,
+      ...colsUbicacion,
     })
     .returning();
 
@@ -48,6 +53,7 @@ export async function crearSolicitud(params: {
     remeraId: remera.id,
     solicitudId: solicitud.id,
     tipo: "solicitud_creada",
+    ...colsUbicacion,
   });
 
   // Un tutor que entró solo por Google puede no tener celular cargado
@@ -64,6 +70,7 @@ export async function crearSolicitud(params: {
         ninoNombre: nino.nombre,
         quienDiceSer: solicitud.quienDiceSer,
         urlDecision: `${urlBase}/panel/solicitudes/${solicitud.id}`,
+        urlUbicacion: ubicacion ? mapsUrl(ubicacion.lat, ubicacion.lng) : null,
       });
     } catch (err) {
       console.error("No se pudo notificar la solicitud de acceso por SMS", err);

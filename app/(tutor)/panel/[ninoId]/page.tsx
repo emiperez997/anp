@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { getNinoDeTutor, edicionesRestantesDeNino } from "@/lib/ownership";
 import { getVistaRemera } from "@/lib/permisos";
 import { accesosLog, solicitudesAcceso } from "@/db/schema";
+import { mapsUrl } from "@/lib/ubicacion";
 import { CardRemera } from "@/components/public/CardRemera";
 import { Button } from "@/components/ui/Button";
 
@@ -110,6 +111,20 @@ export default async function VistaTutorNinoPage({
               {accesos.map((a) => (
                 <li key={a.id} className="text-sm text-ink-muted">
                   {etiquetaTipo(a.tipo)} · {new Date(a.creadoEn).toLocaleString("es-AR")}
+                  {a.ubicacionLat !== null && a.ubicacionLng !== null && (
+                    <>
+                      {" · "}
+                      <a
+                        href={mapsUrl(a.ubicacionLat, a.ubicacionLng)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Ver ubicación
+                      </a>{" "}
+                      <span className="text-xs">(informada por el dispositivo, no verificada)</span>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>
@@ -122,6 +137,8 @@ export default async function VistaTutorNinoPage({
 
 function etiquetaTipo(tipo: string) {
   switch (tipo) {
+    case "escaneo_ubicacion":
+      return "Escaneo de la remera con ubicación";
     case "escaneo":
       return "Escaneo de la remera";
     case "solicitud_creada":

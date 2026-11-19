@@ -9,10 +9,13 @@ import {
   timestamp,
   boolean,
   date,
+  doublePrecision,
+  real,
+  check,
   index,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -44,6 +47,7 @@ export const tipoAccesoLogEnum = pgEnum("tipo_acceso_log", [
   "solicitud_autorizada",
   "solicitud_rechazada",
   "solicitud_expirada",
+  "escaneo_ubicacion", // escaneo con ubicación del navegador
 ]);
 
 // ---------------------------------------------------------------------------
@@ -175,11 +179,22 @@ export const solicitudesAcceso = pgTable(
     autorizadoEn: timestamp("autorizado_en", { withTimezone: true }),
     expiraEn: timestamp("expira_en", { withTimezone: true }), // autorizadoEn + 15 min
     autorizadoPor: uuid("autorizado_por").references(() => tutores.id),
+    ubicacionLat: doublePrecision("ubicacion_lat"),
+    ubicacionLng: doublePrecision("ubicacion_lng"),
+    ubicacionPrecisionM: real("ubicacion_precision_m"),
+    ubicacionCapturadaEn: timestamp("ubicacion_capturada_en", { withTimezone: true }),
   },
   (t) => ({
     // el cron de expiración recorre pendientes/autorizados por expirar
     estadoIdx: index("solicitudes_estado_idx").on(t.estado, t.expiraEn),
     remeraIdx: index("solicitudes_remera_idx").on(t.remeraId),
+    ubicacionIdx: index("solicitudes_ubicacion_capturada_idx")
+      .on(t.ubicacionCapturadaEn)
+      .where(sql`${t.ubicacionCapturadaEn} IS NOT NULL`),
+    ubicacionValida: check(
+      "solicitudes_ubicacion_valida",
+      sql`(${t.ubicacionLat} IS NULL AND ${t.ubicacionLng} IS NULL) OR (${t.ubicacionLat} IS NOT NULL AND ${t.ubicacionLng} IS NOT NULL AND ${t.ubicacionLat} BETWEEN -90 AND 90 AND ${t.ubicacionLng} BETWEEN -180 AND 180)`
+    ),
   })
 );
 
@@ -201,9 +216,22 @@ export const accesosLog = pgTable(
     creadoEn: timestamp("creado_en", { withTimezone: true })
       .defaultNow()
       .notNull(),
+    ubicacionLat: doublePrecision("ubicacion_lat"),
+    ubicacionLng: doublePrecision("ubicacion_lng"),
+    ubicacionPrecisionM: real("ubicacion_precision_m"),
+    ubicacionCapturadaEn: timestamp("ubicacion_capturada_en", { withTimezone: true }),
+    clienteId: varchar("cliente_id", { length: 64 }), // id anónimo por navegador, para dedupe
   },
   (t) => ({
     remeraIdx: index("accesos_log_remera_idx").on(t.remeraId, t.creadoEn),
+    ubicacionIdx: index("accesos_log_ubicacion_capturada_idx")
+      .on(t.ubicacionCapturadaEn)
+      .where(sql`${t.ubicacionCapturadaEn} IS NOT NULL`),
+    clienteIdx: index("accesos_log_cliente_idx").on(t.remeraId, t.clienteId, t.creadoEn),
+    ubicacionValida: check(
+      "accesos_log_ubicacion_valida",
+      sql`(${t.ubicacionLat} IS NULL AND ${t.ubicacionLng} IS NULL) OR (${t.ubicacionLat} IS NOT NULL AND ${t.ubicacionLng} IS NOT NULL AND ${t.ubicacionLat} BETWEEN -90 AND 90 AND ${t.ubicacionLng} BETWEEN -180 AND 180)`
+    ),
   })
 );
 

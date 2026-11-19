@@ -101,3 +101,17 @@ roadmap:
   `TWILIO_SMS_FROM` sale de la misma cuenta trial o si conviene un número
   aparte desde el día 1 (no cambia nada del código, solo qué valor va en esa
   variable).
+
+## Ubicación al escanear
+
+Al abrir `/r/{token}` (si no sos el tutor dueño) el navegador pide permiso de
+geolocalización. La ubicación se guarda en `accesos_log` (`escaneo_ubicacion`)
+y se reenvía al pedir acceso; el tutor la ve como link a Google Maps en el SMS,
+en la pantalla de decisión y en "Últimos accesos". Si el permiso se deniega,
+todo funciona igual sin ubicación. El cron de `/api/cron/expirar` borra las
+coordenadas con más de 30 días (`UBICACION_RETENCION_DIAS`). Ojo: las
+coordenadas que viajan en el SMS al tutor (link de Google Maps) quedan en
+Twilio y en el teléfono según su propia retención; no se pueden borrar desde
+acá. El rate limit por IP de `/escaneo` y `/solicitudes` es en memoria, por
+instancia (best-effort, no global). Requiere HTTPS (o localhost) y aplicar la
+migración `0002` (`npx drizzle-kit migrate`).

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { PhoneInput } from "@/components/ui/PhoneInput";
 import { StitchDivider } from "@/components/ui/StitchDivider";
 import { SOLICITUD_TTL_MINUTOS } from "@/lib/constants";
+import { pedirUbicacion, permisoDenegado, ubicacionEnCache } from "@/lib/ubicacion-cliente";
 
 type EstadoSolicitud = {
   estado: "pendiente" | "autorizado" | "rechazado" | "expirado";
@@ -44,6 +45,7 @@ function FormularioSolicitud({
   const [quienDiceSer, setQuienDiceSer] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
+  const [sinUbicacion, setSinUbicacion] = useState(false);
 
   async function enviar() {
     setError(null);
@@ -52,10 +54,20 @@ function FormularioSolicitud({
       return;
     }
     setCargando(true);
+    let ubicacion = ubicacionEnCache(token);
+    if (!ubicacion) {
+      if (await permisoDenegado()) {
+        setSinUbicacion(true);
+      } else {
+        const r = await pedirUbicacion(1500);
+        if (r.ok) ubicacion = r.ubicacion;
+        else setSinUbicacion(true);
+      }
+    }
     const res = await fetch(`/api/remeras/${token}/solicitudes`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ celular, quienDiceSer }),
+      body: JSON.stringify({ celular, quienDiceSer, ubicacion }),
     });
     setCargando(false);
     if (!res.ok) {
@@ -101,6 +113,13 @@ function FormularioSolicitud({
             className="w-full rounded-2xl border border-line bg-white px-4 py-4 text-base text-ink outline-none focus:border-accent disabled:opacity-50"
           />
         </div>
+
+        {sinUbicacion && (
+          <p className="text-sm text-ink-muted">
+            Enviamos el pedido sin tu ubicación, así que quien cuida a {ninoNombre} no va a saber
+            dónde estás.
+          </p>
+        )}
 
         {error && <p className="text-sm text-accent-dark">{error}</p>}
 

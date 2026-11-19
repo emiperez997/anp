@@ -31,6 +31,15 @@ export default async function SolicitudPage({
         ninoNombre={nino.nombre}
         celularSolicitante={solicitud.celularSolicitante ?? ""}
         quienDiceSer={solicitud.quienDiceSer}
+        ubicacion={
+          solicitud.ubicacionLat !== null && solicitud.ubicacionLng !== null
+            ? {
+                lat: solicitud.ubicacionLat,
+                lng: solicitud.ubicacionLng,
+                precisionM: solicitud.ubicacionPrecisionM,
+              }
+            : null
+        }
       />
     </main>
   );
