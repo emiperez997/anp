@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { StitchDivider } from "@/components/ui/StitchDivider";
+import { mapsUrl } from "@/lib/ubicacion";
 
 type Estado = "pendiente" | "autorizado" | "rechazado" | "expirado";
 
@@ -13,12 +14,14 @@ export function DecisionSolicitud({
   ninoNombre,
   celularSolicitante,
   quienDiceSer,
+  ubicacion,
 }: {
   solicitudId: string;
   estadoInicial: Estado;
   ninoNombre: string;
   celularSolicitante: string;
   quienDiceSer: string | null;
+  ubicacion: { lat: number; lng: number; precisionM: number | null } | null;
 }) {
   const router = useRouter();
   const [estado, setEstado] = useState<Estado>(estadoInicial);
@@ -62,6 +65,25 @@ export function DecisionSolicitud({
           <p className="mt-1">
             <span className="text-ink-muted">Celular:</span> {celularSolicitante}
           </p>
+          <p className="mt-1">
+            <span className="text-ink-muted">Ubicación:</span>{" "}
+            {ubicacion ? (
+              <a
+                href={mapsUrl(ubicacion.lat, ubicacion.lng)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                Ver en el mapa
+                {ubicacion.precisionM !== null && ` (±${ubicacion.precisionM} m)`}
+              </a>
+            ) : (
+              "sin ubicación"
+            )}
+          </p>
+          {ubicacion && (
+            <p className="mt-1 text-xs text-ink-muted">Informada por el dispositivo, no verificada.</p>
+          )}
         </div>
 
         {estado === "pendiente" ? (

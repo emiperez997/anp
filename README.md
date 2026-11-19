@@ -67,3 +67,8 @@ Te propongo que el próximo paso sea la Pantalla 5 (Solicitud de acceso) —
 es la pieza que le da sentido a todo lo demás, y ya tenemos
 `solicitudes_acceso` en el schema y las rutas API como placeholder
 (`app/api/solicitudes/*`) esperando implementación.
+
+## Ubicación (opcional)
+
+Ver la sección "Ubicación al escanear" en `SETUP.md`: se captura con permiso
+del navegador, se muestra solo al tutor dueño y se borra a los 30 días.

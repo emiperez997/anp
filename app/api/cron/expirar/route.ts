@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { eq, lt } from "drizzle-orm";
 import { db } from "@/db";
 import { solicitudesAcceso, accesosLog } from "@/db/schema";
 import { SOLICITUD_TTL_MINUTOS } from "@/lib/solicitudes";
+import { UBICACION_RETENCION_DIAS } from "@/lib/constants";
 
 /**
  * Corre cada minuto (ver vercel.json). Vercel agrega automáticamente
@@ -38,6 +39,29 @@ export async function GET(request: Request) {
         tipo: "solicitud_expirada",
       }),
     ]);
+  }
+
+  // Retención de ubicaciones; separado para que un fallo no afecte la expiración
+  try {
+  const limiteUbicacion = new Date(ahora.getTime() - UBICACION_RETENCION_DIAS * 24 * 60 * 60_000);
+  const nulos = {
+    ubicacionLat: null,
+    ubicacionLng: null,
+    ubicacionPrecisionM: null,
+    ubicacionCapturadaEn: null,
+  };
+  await db.batch([
+    db
+      .update(solicitudesAcceso)
+      .set(nulos)
+      .where(lt(solicitudesAcceso.ubicacionCapturadaEn, limiteUbicacion)),
+    db
+      .update(accesosLog)
+      .set(nulos)
+      .where(lt(accesosLog.ubicacionCapturadaEn, limiteUbicacion)),
+  ]);
+  } catch (err) {
+    console.error("No se pudo limpiar ubicaciones vencidas", err);
   }
 
   return NextResponse.json({ expiradas: vencidas.length });

@@ -4,3 +4,4 @@
  * empaqueta también en el cliente, para mostrar countdowns).
  */
 export const SOLICITUD_TTL_MINUTOS = 15;
+export const UBICACION_RETENCION_DIAS = 30;

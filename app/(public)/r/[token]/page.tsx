@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { getVistaRemera } from "@/lib/permisos";
 import { registrarAccesoSiEsExterno } from "@/lib/accesos";
 import { esTokenValido } from "@/lib/tokens";
+import { CapturaUbicacion } from "@/components/public/CapturaUbicacion";
 import { CardRemera } from "@/components/public/CardRemera";
 import { Button } from "@/components/ui/Button";
 import { StitchDivider } from "@/components/ui/StitchDivider";
@@ -40,6 +41,7 @@ export default async function RemeraPage({
 
   return (
     <main className="mx-auto min-h-dvh max-w-sm px-6 py-10">
+      {vista.tipo !== "tutor" && <CapturaUbicacion token={token} />}
       <CardRemera vista={vista} />
 
       {vista.tipo === "tutor" && (
